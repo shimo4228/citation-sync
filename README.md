@@ -1,6 +1,6 @@
 # citation-sync
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/shimo4228/citation-sync) [![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/shimo4228/citation-sync)](https://gitmcp.io/shimo4228/citation-sync) [![View Code Wiki](https://assets.codewiki.google/readme-badge/static.svg)](https://codewiki.google/github.com/shimo4228/citation-sync)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/shimo4228/citation-sync) [![GitMCP](https://img.shields.io/endpoint?url=https://gitmcp.io/badge/shimo4228/citation-sync)](https://gitmcp.io/shimo4228/citation-sync)
 
 An [Agent Skill](https://agentskills.io/specification) that keeps the **four citation layers of a research repository in sync**. When a repo cites external literature, that citation surfaces in four places with four different audiences — and writing it into just one quietly makes it nonexistent in the other three. This skill audits the divergence and syncs bottom-up.
 
