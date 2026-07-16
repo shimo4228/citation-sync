@@ -1,12 +1,12 @@
 # citation-sync
 
-> A Claude Code skill (MIT) that keeps the four citation layers of a research repository in sync. It audits divergence between in-text citations in docs, `.zenodo.json` references, `graph.jsonld` ExternalReference nodes, and Wikidata P2860 "cites work" edges, then syncs bottom-up — deferring each single-layer implementation to a specialist sibling skill.
+> A Claude Code skill (MIT) that keeps the three citation layers of a research repository in sync. It audits divergence between in-text citations in docs, `.zenodo.json` references, and `graph.jsonld` ExternalReference nodes, then syncs bottom-up — deferring each single-layer implementation to a specialist sibling skill. A former fourth layer (Wikidata P2860 edges) was permanently retired in 2026-07 after the host's governance revoked the author's self-created entries (authorship-strategy ADR-0021).
 
 ## Core documentation
 
 - [llms-full.txt](llms-full.txt): self-contained Q&A reference for AI agents (Project Facts, 9 question-form H2 sections)
-- [README.md](README.md): human-facing narrative (four-layer table, install, phase overview)
-- [SKILL.md](skills/citation-sync/SKILL.md): full skill specification — four-layer model, Phase 0-5 workflow, curation criteria, pitfalls table (skill body in Japanese; workflow and script are language-neutral)
+- [README.md](README.md): human-facing narrative (three-layer table, install, phase overview)
+- [SKILL.md](skills/citation-sync/SKILL.md): full skill specification — three-layer model, Phase 0-5 workflow, curation criteria, pitfalls table (skill body in Japanese; workflow and script are language-neutral)
 - [citation_audit.py](skills/citation-sync/scripts/citation_audit.py): read-only audit script — per-repo identifier × layer matrix, exit 0 converged / 1 divergence / 2 fatal
 
 ## Architecture
@@ -25,4 +25,4 @@
 
 - [release-doi](https://github.com/shimo4228/release-doi): canonical implementation for layer 2 — `.zenodo.json` citation surface within the release workflow
 - [jsonld-knowledge-graph](https://github.com/shimo4228/jsonld-knowledge-graph): canonical implementation for layer 3 — ExternalReference node design in `graph.jsonld`
-- [wikidata-federation](https://github.com/shimo4228/wikidata-federation): canonical implementation for layer 4 — Wikidata items, P2860 edges, sameAs QID injection, constraint lint
+- wikidata-federation: former layer-4 implementation — retired and repository removed in 2026-07 (authorship-strategy ADR-0021)

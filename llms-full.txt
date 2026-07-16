@@ -24,17 +24,17 @@ This document is the self-contained AI reference for `citation-sync` (shimo4228,
 - **Sync order**: bottom-up — zenodo → graph → Wikidata
 - **Layer-2 implementation**: [release-doi](https://github.com/shimo4228/release-doi)
 - **Layer-3 implementation**: [jsonld-knowledge-graph](https://github.com/shimo4228/jsonld-knowledge-graph)
-- **Layer-4 implementation**: [wikidata-federation](https://github.com/shimo4228/wikidata-federation)
+- **Former layer-4 implementation**: wikidata-federation — retired and repository removed in 2026-07 (authorship-strategy ADR-0021)
 - **Canonical copy**: the author's live Claude Code harness; this repo is a one-way mirror via `scripts/sync-from-local.sh`
 - **Standard**: agentskills.io/specification
 
 ## What is citation-sync?
 
-citation-sync is defined as a Claude Code Agent Skill that audits and synchronizes the four citation layers of a DOI-registered research repository: in-text citations in docs (ADRs, glossary, empirical notes), `.zenodo.json` `related_identifiers` references, `graph.jsonld` ExternalReference nodes, and Wikidata P2860 "cites work" edges. It is an orchestrator — it owns divergence detection, curation criteria, and sync order, while each single-layer write is deferred to a specialist skill (release-doi, jsonld-knowledge-graph, wikidata-federation). The skill exists because a citation written into only one layer is invisible to the audiences of the other three.
+citation-sync is defined as a Claude Code Agent Skill that audits and synchronizes the three citation layers of a DOI-registered research repository: in-text citations in docs (ADRs, glossary, empirical notes), `.zenodo.json` `related_identifiers` references, and `graph.jsonld` ExternalReference nodes. It is an orchestrator — it owns divergence detection, curation criteria, and sync order, while each single-layer write is deferred to a specialist skill (release-doi, jsonld-knowledge-graph). The skill exists because a citation written into only one layer is invisible to the audiences of the others. A former fourth layer (Wikidata P2860 edges) was permanently retired in 2026-07 after the host's governance revoked the author's self-created entries (authorship-strategy ADR-0021).
 
-## What are the four citation layers?
+## What are the three citation layers?
 
-The four layers are defined by carrier and audience. Layer 1 is in-text citations in repo docs, read by humans and LLM crawlers. Layer 2 is `.zenodo.json` references, which propagate to DataCite, OpenAIRE, and Scholix at the next release. Layer 3 is `graph.jsonld` ExternalReference nodes, consumed by LLM ingest pipelines, Hugging Face mirrors, and knowledge-graph crawlers. Layer 4 is Wikidata P2860 edges on the repo item, surfacing in Scholia and CC0 dumps — the layer visible from the *cited researcher's side*. Layer 1 (docs) is the source of truth; upper layers may carry only citations that actually exist in docs.
+The three layers are defined by carrier and audience. Layer 1 is in-text citations in repo docs, read by humans and LLM crawlers. Layer 2 is `.zenodo.json` references, which propagate to DataCite, OpenAIRE, and Scholix at the next release. Layer 3 is `graph.jsonld` ExternalReference nodes, consumed by LLM ingest pipelines, Hugging Face mirrors, and knowledge-graph crawlers. Layer 1 (docs) is the source of truth; upper layers may carry only citations that actually exist in docs. A former layer 4 (Wikidata P2860 edges on the repo item) was permanently retired in 2026-07 after the host's governance revoked the author's self-created entries; the audit script's `--skip-wikidata` flag remains for backward compatibility.
 
 ## What does Phase 0 Audit do?
 
@@ -44,9 +44,9 @@ Phase 0 runs `skills/citation-sync/scripts/citation_audit.py`, a read-only scrip
 
 Phase 1 is defined as the judgment layer: deciding which machine-extracted identifiers from docs deserve promotion to official repo citations, because not every URL is a scholarly citation. The criteria: only public docs (not `.notes/` scratch or paper drafts), only citation contexts (not example IDs, CHANGELOG entries, or pasted tool output), only external works (sibling-repo DOIs are ecosystem cross-links, reported separately), and identifier-content verification via arXiv API or Crossref — LLM-written citation links can carry hallucinated arXiv IDs pointing at unrelated papers. Non-promotion decisions are recorded so the same identifier is not re-reviewed on the next audit.
 
-## How do Phases 2-4 sync the layers?
+## How do Phases 2-3 sync the layers?
 
-Phases 2-4 propagate curated citations layer by layer, each deferring to its canonical skill. Phase 2 adds `related_identifiers` entries to `.zenodo.json` following the release-doi skill (entry format, arXiv DataCite DOI form `10.48550/arXiv.NNNN.NNNNN`, deduplication); note that `.zenodo.json` propagates to DataCite only at the next release. Phase 3 adds ExternalReference nodes to `graph.jsonld` following the jsonld-knowledge-graph skill, with a 1-3 sentence description of why the repo cites the work. Phase 4 federates to Wikidata following wikidata-federation Phase 4.5: bibliographic skeleton creation, P2860 edges on the repo item, sameAs QID injection into the graph, and a mandatory post-write constraint lint.
+Phases 2-3 propagate curated citations layer by layer, each deferring to its canonical skill. Phase 2 adds `related_identifiers` entries to `.zenodo.json` following the release-doi skill (entry format, arXiv DataCite DOI form `10.48550/arXiv.NNNN.NNNNN`, deduplication); note that `.zenodo.json` propagates to DataCite only at the next release. Phase 3 adds ExternalReference nodes to `graph.jsonld` following the jsonld-knowledge-graph skill, with a 1-3 sentence description of why the repo cites the work. The former Phase 4 (Wikidata federation) is retired and no longer runs.
 
 ## Why sync bottom-up?
 
@@ -58,11 +58,11 @@ Phase 5 re-runs the Phase 0 audit and requires every repo to report CONVERGED be
 
 ## When does the skill trigger?
 
-The skill triggers when a user says the reference list looks thin, citations are out of sync, or asks to reflect cited literature into Wikidata or the graph; when new external papers were cited in ADRs, glossary, or empirical docs; before a release of a DOI-registered repo; or when a repo's Wikidata item shows fewer cited works than its docs. Invocation is the `/citation-sync` slash command or automatic triggering from those conditions.
+The skill triggers when a user says the reference list looks thin, citations are out of sync, or asks to reflect cited literature into the graph; when new external papers were cited in ADRs, glossary, or empirical docs; or before a release of a DOI-registered repo. Invocation is the `/citation-sync` slash command or automatic triggering from those conditions.
 
 ## When should this skill NOT be used?
 
-This skill should not be used for a paper's own reference list — a paper item's P2860 edges come from the paper's reference list and are handled by paper-deposit and wikidata-federation, not by repo-layer sync; mixing the two carriers double-counts citations. It should also not be used on repos that cite nothing, since there is no divergence to detect. The boundary rule: repo-item citations come from repo docs, paper-item citations come from the paper.
+This skill should not be used for a paper's own reference list — that is handled by paper-deposit, not by repo-layer sync; mixing the two carriers double-counts citations. It should also not be used on repos that cite nothing, since there is no divergence to detect. The boundary rule: repo-item citations come from repo docs, paper-item citations come from the paper.
 
 ## Who is shimo4228?
 
