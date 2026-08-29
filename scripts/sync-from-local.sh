@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# sync-from-local.sh — one-way export from the live Claude Code harness
-# (~/.claude) into this skill repo.
+# sync-from-local.sh — one-way export from the live canonical source of
+# this repo's skills (see HARNESS_SYNC_SOURCE below) into this skill repo.
 #
 # The set of skills to sync is derived from the skill directories already
 # present under this repo's skills/ — the repo declares what it publishes
@@ -10,20 +10,22 @@
 # llms*.txt, CHANGELOG) are never touched. The script never commits —
 # `git diff` in this repo is the review gate.
 #
-# This script is vendored byte-identical across skill repos that publish
-# a harness-canonical skill. Do not add repo-specific logic here.
+# Only this repo's source default differs from the other skill repos: the
+# SOURCE_DIR line below and the Config line documenting it, both pointing at
+# wherever this repo's skills are canonical. All logic is vendored
+# byte-identical across skill repos — do not add repo-specific logic here.
 #
 # Usage:
 #   scripts/sync-from-local.sh --dry-run   # report differences only
 #   scripts/sync-from-local.sh             # apply to working tree
 #
 # Config (env overrides):
-#   HARNESS_SYNC_SOURCE  source harness dir      (default: ~/.claude)
+#   HARNESS_SYNC_SOURCE  source harness dir      (default: ~/MyAI_Lab/paper-lab/.claude)
 #   HARNESS_SYNC_ORIGIN  origin value to require (default: shimo4228)
 
 set -euo pipefail
 
-SOURCE_DIR="${HARNESS_SYNC_SOURCE:-$HOME/.claude}"
+SOURCE_DIR="${HARNESS_SYNC_SOURCE:-$HOME/MyAI_Lab/paper-lab/.claude}"
 ORIGIN="${HARNESS_SYNC_ORIGIN:-shimo4228}"
 TARGET_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
