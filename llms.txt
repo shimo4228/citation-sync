@@ -4,25 +4,26 @@
 
 ## Core documentation
 
-- [llms-full.txt](llms-full.txt): self-contained Q&A reference for AI agents (Project Facts, 9 question-form H2 sections)
+- [llms-full.txt](llms-full.txt): self-contained Q&A reference for AI agents (Project Facts, 10 question-form H2 sections)
 - [README.md](README.md): human-facing narrative (three-layer table, install, phase overview)
 - [SKILL.md](skills/citation-sync/SKILL.md): full skill specification — three-layer model, Phase 0-5 workflow, curation criteria, pitfalls table (skill body in Japanese; workflow and script are language-neutral)
-- [citation_audit.py](skills/citation-sync/scripts/citation_audit.py): read-only audit script — per-repo identifier × layer matrix, exit 0 converged / 1 divergence / 2 fatal
+- [citation_audit.py](skills/citation-sync/scripts/citation_audit.py): read-only audit script (Python 3.11+, standard library only) — per-repo identifier × layer matrix, exit 0 converged / 1 divergence / 2 audit not completed
 
 ## Architecture
 
-- 4 citation layers: **1. docs** (in-text citations in ADRs / glossary / empirical notes — source of truth), **2. zenodo** (`.zenodo.json` `related_identifiers` → DataCite / OpenAIRE), **3. graph** (`graph.jsonld` ExternalReference nodes → LLM ingest), **4. wikidata** (repo item P2860 → Scholia, the cited researchers' side)
-- 6-phase workflow: **Phase 0 Audit** (read-only script, `--skip-wikidata`, `--json`) → **Phase 1 Curate** (judgment layer — not every URL is a scholarly citation) → **Phases 2-4 layer-by-layer sync** (bottom-up) → **Phase 5 Verify** (re-run audit until converged)
+- 3 citation layers: **1. docs** (in-text citations in ADRs / glossary / empirical notes — source of truth), **2. zenodo** (`.zenodo.json` `related_identifiers` → DataCite / OpenAIRE), **3. graph** (`graph.jsonld` ExternalReference nodes → LLM ingest); a former layer 4 (Wikidata P2860) is retired (ADR-0021)
+- 6-phase workflow: **Phase 0 Audit** (read-only script, always with `--skip-wikidata`, `--json`) → **Phase 1 Curate** (judgment layer — not every URL is a scholarly citation) → **Phases 2-3 layer-by-layer sync** (bottom-up; Phase 4 Wikidata retired) → **Phase 5 Verify** (re-run the audit; identifiers left out in curation stay DIVERGED and are reported as intentional residuals)
 - Orchestrator design: this skill owns only divergence detection, curation criteria, and sync order; single-layer writes are deferred to sibling skills
-- Canonical copy lives in the author's Claude Code harness; this repo is a one-way mirror via `scripts/sync-from-local.sh`
+- Status: active, synced one way from the author's Claude Code harness by `scripts/sync-from-local.sh` (it never commits)
 
 ## Standard reference
 
 - [Agent Skill specification](https://agentskills.io/specification): the Claude Code skill format used by this repo
-- [SkillsMP marketplace](https://agentskills.io/specification): one-step install via `/skills add`
 
 ## Sibling skills
 
 - [release-doi](https://github.com/shimo4228/release-doi): canonical implementation for layer 2 — `.zenodo.json` citation surface within the release workflow
 - [jsonld-knowledge-graph](https://github.com/shimo4228/jsonld-knowledge-graph): canonical implementation for layer 3 — ExternalReference node design in `graph.jsonld`
 - wikidata-federation: former layer-4 implementation — retired and repository removed in 2026-07 (authorship-strategy ADR-0021)
+- [claude-skill-paper-ecosystem](https://github.com/shimo4228/claude-skill-paper-ecosystem): writes and reviews academic papers; a paper's own reference list is handled there, not by this skill
+- [shimo4228](https://github.com/shimo4228/shimo4228): the author's hub — five practice lines and their concept DOIs; this skill supports the [Authorship Strategy](https://github.com/shimo4228/authorship-strategy) line (concept DOI 10.5281/zenodo.20263316)
