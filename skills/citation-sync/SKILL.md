@@ -21,8 +21,10 @@ origin: shimo4228
 
 ## Phase 0: Audit (read-only)
 
+> 以下のパスは `${CLAUDE_SKILL_DIR}`（この SKILL.md のあるディレクトリ）から始まる。変数を置換しないエージェントでは、そのディレクトリと読み替える。
+
 ```bash
-python3 ~/.claude/skills/citation-sync/scripts/citation_audit.py REPO_DIR [REPO_DIR ...]
+python3 "${CLAUDE_SKILL_DIR}/scripts/citation_audit.py" REPO_DIR [REPO_DIR ...]
 #   --skip-wikidata   retired 層 (旧層 4) の探索を省略。常に付ける
 #   --json OUT.json   機械可読の結果も保存
 # exit 0 = 全 repo converged, 1 = divergence あり, 2 = fatal
